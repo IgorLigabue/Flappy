@@ -12,6 +12,13 @@ const flappyBird = {
     altura:24,
     posX:10,
     posY:50,
+    vel:0,
+    grav:0.25,
+
+    gravity (){
+        flappyBird.vel = flappyBird.vel + flappyBird.grav ;
+        flappyBird.posY = flappyBird.posY + flappyBird.vel ;
+    },
 
     draw () {
         context.drawImage(
@@ -80,19 +87,81 @@ const background = {
         );
     }
 }
+//Menu inicial
+const menssegeGetReady = {
+    sX: 134,
+    sY: 0,
+    w: 174,
+    h: 152,
+    x: (canvas.width / 2) - 174 / 2,
+    y: 50,
 
-function draws () {
+    draw() {
+      context.drawImage(
+        sprites,
+        menssegeGetReady.sX, menssegeGetReady.sY,
+        menssegeGetReady.w, menssegeGetReady.h,
+        menssegeGetReady.x, menssegeGetReady.y,
+        menssegeGetReady.w, menssegeGetReady.h
+      );
+    }
+  }
+
+//
+//
+//  TELAS
+//
+//Chamada dos objetos, a ordem indica a camada que irá aparecer no canvas.
+
+
+let activeFrame = {};
+function frameSwitch(newFrame) {
+    activeFrame = newFrame;
 }
 
+const Frames = {
+    play:{
+        draw (){
+            background.draw();
+            ground.draw ();
+            flappyBird.draw ();    
+            menssegeGetReady.draw();
+
+        },
+        click(){
+            frameSwitch(frames.GAME);
+        },
+        reload (){
+
+        }
+    }
+};  
+
+Frames.GAME = {
+    draw () {
+        background.draw();
+        ground.draw ();
+        flappyBird.draw ();    
+    },
+    reload () {
+        flappyBird.gravity();
+    }
+};
 
 
-//Chamada dos objetos, a ordem indica a camada que irá aparecer no canvas.
+
 function loop () {
-    draws();
-    background.draw();
-    ground.draw ();
-    flappyBird.draw ();
+    activeFrame.draw();
+    activeFrame.reload();
 
     requestAnimationFrame (loop);//função adequada para o canvas ter a frequencia de 60hz no loop.
 }
+
+window.addEventListener('click', function () {
+    if( activeFrame.click ) {
+        activeFrame.click();
+    }
+});
+
+frameSwitch(Frames.play);
 loop ();
