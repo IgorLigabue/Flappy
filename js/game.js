@@ -1,35 +1,68 @@
 const sprites = new Image();
 sprites.src = '../sprites.png';
 
+const sound_HIT = new Audio();
+sound_HIT.src = './efect/hit.wav';
+
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 
-//Objeto e posição do Flappy
-const flappyBird = {
-    spriteX:0,
-    spriteY:0,
-    largura:33,
-    altura:24,
-    posX:10,
-    posY:50,
-    vel:0,
-    grav:0.25,
+function toCollision(flappyBird, ground){
+    const flappyBirdposY = flappyBird.posY + flappyBird.altura;
+    const groundposY = ground.posY;
 
-    gravity (){
-        flappyBird.vel = flappyBird.vel + flappyBird.grav ;
-        flappyBird.posY = flappyBird.posY + flappyBird.vel ;
-    },
-
-    draw () {
-        context.drawImage(
-            sprites,
-            flappyBird.spriteX,flappyBird.spriteY, //sprite X,Y
-            flappyBird.largura, flappyBird.altura, //tamanho
-            flappyBird.posX, flappyBird.posY, //posição dentro do canvas
-            flappyBird.largura, flappyBird.altura, //tamanho a aparecer no canvas
-        );
+    if(flappyBirdposY >= groundposY) {
+        return true;
     }
+
+    return false;
 }
+
+//função cria flappybird
+function createFlappybird () {
+    const flappyBird = {
+        spriteX:0,
+        spriteY:0,
+        largura:33,
+        altura:24,
+        posX:10,
+        posY:50,
+        vel:0,
+        grav:0.25,
+        jumpIn: 4.5,
+    
+        jump (){
+            flappyBird.vel  = - flappyBird.jumpIn
+        },
+    
+        gravity (){
+    
+            if (toCollision(flappyBird, ground)){
+                sound_HIT.play();
+                setTimeout(()=> {
+                    frameSwitch(Frames.play)
+                }, 500);
+
+                return;
+            }
+            flappyBird.vel =  flappyBird.vel + flappyBird.grav ;
+            flappyBird.posY = flappyBird.posY + flappyBird.vel ;
+        },
+    
+        draw () {
+            context.drawImage(
+                sprites,
+                flappyBird.spriteX,flappyBird.spriteY, //sprite X,Y
+                flappyBird.largura, flappyBird.altura, //tamanho
+                flappyBird.posX, flappyBird.posY, //posição dentro do canvas
+                flappyBird.largura, flappyBird.altura, //tamanho a aparecer no canvas
+            );
+        }
+    }
+     return flappyBird;
+}
+//Objeto e posição do Flappy
+
 //Objeto e posição do Chão
 const ground = {
     spriteX:0,
@@ -56,7 +89,7 @@ const ground = {
             ground.largura, ground.altura, //tamanho a aparecer no canvas
         );
     }
-}
+};
 //Objeto e posição do Chão
 const background = {
     spriteX:390,
@@ -86,7 +119,7 @@ const background = {
             background.largura, background.altura, //tamanho a aparecer no canvas
         );
     }
-}
+};
 //Menu inicial
 const menssegeGetReady = {
     sX: 134,
@@ -105,7 +138,7 @@ const menssegeGetReady = {
         menssegeGetReady.w, menssegeGetReady.h
       );
     }
-  }
+  };
 
 //
 //
@@ -113,55 +146,66 @@ const menssegeGetReady = {
 //
 //Chamada dos objetos, a ordem indica a camada que irá aparecer no canvas.
 
-
+const globals = {};
 let activeFrame = {};
 function frameSwitch(newFrame) {
     activeFrame = newFrame;
+
+    if(activeFrame.init) {
+        activeFrame.init ();
+    }
 }
 
 const Frames = {
-    play:{
+    play: {
+        init (){
+            globals.flappyBird = createFlappybird();
+        },
         draw (){
-            background.draw();
+            background.draw ();
             ground.draw ();
-            flappyBird.draw ();    
-            menssegeGetReady.draw();
+            globals.flappyBird.draw ();    
+            menssegeGetReady.draw ();
 
         },
         click(){
-            frameSwitch(frames.GAME);
+            frameSwitch(Frames.GAME);
         },
         reload (){
-
         }
     }
-};  
+};
 
 Frames.GAME = {
     draw () {
         background.draw();
         ground.draw ();
-        flappyBird.draw ();    
+        globals.flappyBird.draw ();    
+    },
+    click (){
+        globals.flappyBird.jump();
     },
     reload () {
-        flappyBird.gravity();
+        globals.flappyBird.gravity();
     }
 };
 
 
 
 function loop () {
-    activeFrame.draw();
-    activeFrame.reload();
+    activeFrame.draw ();
+    activeFrame.reload ();
 
     requestAnimationFrame (loop);//função adequada para o canvas ter a frequencia de 60hz no loop.
 }
 
-window.addEventListener('click', function () {
+window.addEventListener ('click', function () {
     if( activeFrame.click ) {
         activeFrame.click();
     }
 });
 
-frameSwitch(Frames.play);
+
+frameSwitch (Frames.play);
 loop ();
+
