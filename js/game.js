@@ -21,14 +21,14 @@ function toCollision(flappyBird, ground){
 //função cria flappybird
 function createFlappybird () {
     const flappyBird = {
-        spriteX:0,
-        spriteY:0,
-        largura:33,
-        altura:24,
-        posX:10,
-        posY:50,
-        vel:0,
-        grav:0.25,
+        spriteX: 0,
+        spriteY: 0,
+        largura: 33,
+        altura: 24,
+        posX: 10,
+        posY: 50,
+        vel: 0,
+        grav: 0.25,
         jumpIn: 4.5,
     
         jump (){
@@ -37,7 +37,7 @@ function createFlappybird () {
     
         gravity (){
     
-            if (toCollision(flappyBird, ground)){
+            if (toCollision(flappyBird, globals.ground)){
                 sound_HIT.play();
                 setTimeout(()=> {
                     frameSwitch(Frames.play)
@@ -48,8 +48,18 @@ function createFlappybird () {
             flappyBird.vel =  flappyBird.vel + flappyBird.grav ;
             flappyBird.posY = flappyBird.posY + flappyBird.vel ;
         },
-    
+        
+        Mooving: [
+            { spriteX: 0, spriteY: 0, }, // asa pra cima
+            { spriteX: 0, spriteY: 26, }, // asa no meio 
+            { spriteX: 0, spriteY: 52, }, // asa pra baixo
+            { spriteX: 0, spriteY: 26, }, // asa no meio 
+          ],
+          
+
         draw () {
+            const { spriteX, spriteY } = flappyBird.Mooving[2];
+
             context.drawImage(
                 sprites,
                 flappyBird.spriteX,flappyBird.spriteY, //sprite X,Y
@@ -58,39 +68,53 @@ function createFlappybird () {
                 flappyBird.largura, flappyBird.altura, //tamanho a aparecer no canvas
             );
         }
-    }
+    };
      return flappyBird;
 }
 //Objeto e posição do Flappy
 
-//Objeto e posição do Chão
-const ground = {
-    spriteX:0,
-    spriteY:610,
-    largura:224,
-    altura:112,
-    posX:0,
-    posY: canvas.height -112,
+//Objeto e posição do chão
+function createGround() {
+    const ground = {
+        spriteX:0,
+        spriteY:610,
+        largura:224,
+        altura:112,
+        posX:0,
+        posY: canvas.height -112,
+        reload() {
+            const mooveGround = 1;
+            const repetIn = ground.largura / 2;
+            const moov = ground.posX - mooveGround;
 
-    draw () {
-        context.drawImage(
-            sprites,
-            ground.spriteX, ground.spriteY, //sprite X,Y
-            ground.largura, ground.altura, //tamanho
-            ground.posX, ground.posY, //posição dentro do canvas
-            ground.largura, ground.altura, //tamanho a aparecer no canvas
-        );
+             //console.log('[ground.posX]', ground.posX);
+             //console.log('[repetIn]',repetIn);
+             //console.log('[moov]', moov % repetIn);
 
-        context.drawImage(
-            sprites,
-            ground.spriteX, ground.spriteY, //sprite X,Y
-            ground.largura, ground.altura, //tamanho
-            (ground.posX+ground.largura), ground.posY, //posição dentro do canvas
-            ground.largura, ground.altura, //tamanho a aparecer no canvas
-        );
-    }
-};
-//Objeto e posição do Chão
+            ground.posX = moov % repetIn;
+        },
+
+        draw () {
+            context.drawImage(
+                sprites,
+                ground.spriteX, ground.spriteY, //sprite X,Y
+                ground.largura, ground.altura, //tamanho
+                ground.posX, ground.posY, //posição dentro do canvas
+                ground.largura, ground.altura, //tamanho a aparecer no canvas
+            );
+
+            context.drawImage(
+                sprites,
+                ground.spriteX, ground.spriteY, //sprite X,Y
+                ground.largura, ground.altura, //tamanho
+                (ground.posX+ground.largura), ground.posY, //posição dentro do canvas
+                ground.largura, ground.altura, //tamanho a aparecer no canvas
+            );
+        }
+    };
+    return ground;
+}
+//Objeto e posição do fundo
 const background = {
     spriteX:390,
     spriteY:0,
@@ -160,10 +184,12 @@ const Frames = {
     play: {
         init (){
             globals.flappyBird = createFlappybird();
+            globals.ground = createGround();
+
         },
         draw (){
             background.draw ();
-            ground.draw ();
+            globals.ground.draw ();
             globals.flappyBird.draw ();    
             menssegeGetReady.draw ();
 
@@ -172,6 +198,7 @@ const Frames = {
             frameSwitch(Frames.GAME);
         },
         reload (){
+            globals.ground.reload();
         }
     }
 };
@@ -179,7 +206,7 @@ const Frames = {
 Frames.GAME = {
     draw () {
         background.draw();
-        ground.draw ();
+        globals.ground.draw ();
         globals.flappyBird.draw ();    
     },
     click (){
@@ -189,8 +216,6 @@ Frames.GAME = {
         globals.flappyBird.gravity();
     }
 };
-
-
 
 function loop () {
     activeFrame.draw ();
@@ -205,7 +230,7 @@ window.addEventListener ('click', function () {
     }
 });
 
-
 frameSwitch (Frames.play);
 loop ();
 
+//https://youtu.be/9BZspL5MRvQ?list=PLTcmLKdIkOWmeNferJ292VYKBXydGeDej&t=541
