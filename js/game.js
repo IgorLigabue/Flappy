@@ -49,25 +49,46 @@ function createFlappybird () {
             flappyBird.posY = flappyBird.posY + flappyBird.vel ;
         },
         
-        Mooving: [
-            { spriteX: 0, spriteY: 0, }, // asa pra cima
+        mooving: [
+            { spriteX: 0, spriteY: 0,  },  // asa pra cima
             { spriteX: 0, spriteY: 26, }, // asa no meio 
             { spriteX: 0, spriteY: 52, }, // asa pra baixo
             { spriteX: 0, spriteY: 26, }, // asa no meio 
           ],
           
+          currentFrame: 0,
+
+          frameUpdate() {
+            //const i = this.currentFrame;
+
+            if ( this.currentFrame < 3){
+
+
+                setTimeout(()=> {
+                    frameSwitch(Frames.play)
+                }, 500);
+
+
+
+                flappyBird.currentFrame += 1 ;
+              }else{
+                  flappyBird.currentFrame = 0; 
+            }
+            console.log('[currentFrame]');
+          },
 
         draw () {
-            const { spriteX, spriteY } = flappyBird.Mooving[2];
-
+            flappyBird.frameUpdate();
+            const { spriteX, spriteY } = flappyBird.mooving[flappyBird.currentFrame];
+        
             context.drawImage(
                 sprites,
-                flappyBird.spriteX,flappyBird.spriteY, //sprite X,Y
+                spriteX,spriteY, //sprite X,Y
                 flappyBird.largura, flappyBird.altura, //tamanho
                 flappyBird.posX, flappyBird.posY, //posição dentro do canvas
                 flappyBird.largura, flappyBird.altura, //tamanho a aparecer no canvas
-            );
-        }
+                );
+            }
     };
      return flappyBird;
 }
@@ -233,4 +254,3 @@ window.addEventListener ('click', function () {
 frameSwitch (Frames.play);
 loop ();
 
-//https://youtu.be/9BZspL5MRvQ?list=PLTcmLKdIkOWmeNferJ292VYKBXydGeDej&t=541
