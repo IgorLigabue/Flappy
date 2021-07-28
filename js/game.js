@@ -61,15 +61,7 @@ function createFlappybird () {
           frameUpdate() {
             //const i = this.currentFrame;
 
-            if ( this.currentFrame < 3){
-
-
-                setTimeout(()=> {
-                    frameSwitch(Frames.play)
-                }, 500);
-
-
-
+            if ( this.currentFrame < 3 ){
                 flappyBird.currentFrame += 1 ;
               }else{
                   flappyBird.currentFrame = 0; 
